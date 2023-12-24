@@ -52,7 +52,7 @@ docker build -t spark-with-glue-builder:v3.5.0 . --network host
 ```
 
 ## Image Details
-# Base Image
+### Base Image
 The Dockerfile starts with the official Python 3.10 image (`python:3.10.12-bookworm`). I wanted to build Spark with PySpark support for Python 3.10, so I needed an image with both the JDK and Python 3.10. At the time of writing this Docker image, the latest Python version in synaptic package manager for Ubuntu/Debian was 3.9. Building Python from sources takes a long time, so I decided to start from a base image with Python 3.10 and simply install OpenJDK 8.
 
 ## Installed Packages
@@ -70,16 +70,16 @@ The Glue Data Catalog Client is downloaded, extracted, and patched to ensure com
 ### Apache Hive
 Both Hive 2 and Hive 3 are downloaded, extracted, and patched. The build process includes Maven and resolves dependencies using a mirrored repository.
 
-## Glue Data Catalog Client Build
+### Glue Data Catalog Client Build
 With Hive patched and installed, the Glue Data Catalog Client is built. The build includes support for specific Hive and Spark versions.
 
-## Apache Spark Build
+### Apache Spark Build
 Apache Spark sources (version 3.5.0) are downloaded, and Maven is configured for memory usage. A patch is applied to address a known issue, and Spark is built with support for various components, including Hive and Kubernetes.
 
-## Additional Jars
+### Additional Jars
 Various JAR files required for Spark operation are downloaded and copied to the Spark distribution directory. These include the AWS Java SDK bundle, Hadoop AWS library, PostgreSQL library, Delta IO libraries, and other dependencies.
 
-## Hadoop Native Libraries
+### Hadoop Native Libraries
 Hadoop native libraries are downloaded and installed to support Hadoop operations.
 
 ## Important Notes
