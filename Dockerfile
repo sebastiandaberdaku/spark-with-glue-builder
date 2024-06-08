@@ -1,6 +1,6 @@
 # I want to build Spark with PySpark support for Python 3.10, so I need a docker image with both Python and Java.
 # It is faster to start from an image with Python and install the JDK later. 
-FROM python:3.10.12-bookworm
+FROM python:3.10.14-bookworm
 
 # Install packages
 RUN echo "deb http://ftp.de.debian.org/debian sid main" >> /etc/apt/sources.list; \
@@ -21,7 +21,7 @@ ENV PATH=$PATH:${MAVEN_HOME}/bin
 
 WORKDIR /opt
 # Download and extract the Glue Data Catalog Client
-RUN wget --quiet "https://github.com/sebastiandaberdaku/aws-glue-data-catalog-client-for-apache-hive-metastore/archive/refs/tags/v3.5.0.tar.gz" -O /opt/glue.tar.gz; \
+RUN wget --quiet "https://github.com/sebastiandaberdaku/aws-glue-data-catalog-client-for-apache-hive-metastore/archive/refs/tags/v3.5.1.tar.gz" -O /opt/glue.tar.gz; \
     mkdir -p /opt/glue; \
     tar zxf /opt/glue.tar.gz --strip-components=1 --directory=/opt/glue; \
     rm /opt/glue.tar.gz
@@ -71,7 +71,7 @@ RUN cd /opt/glue; \
 
 ## Build Spark
 # Fetch the Spark sources
-ARG SPARK_VERSION=3.5.0
+ARG SPARK_VERSION=3.5.1
 RUN wget --quiet "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}.tgz" -O /opt/spark.tgz \
 &&  mkdir -p /opt/spark \
 &&  tar zxf /opt/spark.tgz --strip-components=1 --directory=/opt/spark \
@@ -81,10 +81,10 @@ RUN wget --quiet "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${
 ENV MAKEFLAGS="-j$(nproc)"
 ENV MAVEN_OPTS="-Xss64m -Xmx2g -XX:ReservedCodeCacheSize=1g"
 # Patch (see: https://issues.apache.org/jira/browse/SPARK-45201) and build a runnable Spark distribution
-COPY ./spark-3.5.0.patch /opt/spark/
+COPY ./spark-${SPARK_VERSION}.patch /opt/spark/
 ARG SCALA_VERSION=2.12
 RUN cd /opt/spark; \
-    patch -p1 <spark-3.5.0.patch; \
+    patch -p1 <spark-${SPARK_VERSION}.patch; \
     ./dev/make-distribution.sh \
       --name spark \
       --pip \
@@ -124,7 +124,7 @@ ARG POSTGRES_VERSION=42.6.0
 RUN wget --quiet -P "${SPARK_DIST_DIR}/jars/" "https://repo1.maven.org/maven2/org/postgresql/postgresql/${POSTGRES_VERSION}/postgresql-${POSTGRES_VERSION}.jar"
 RUN wget --quiet -P "${SPARK_DIST_DIR}/jars/" "https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.31.0/checker-qual-3.31.0.jar"
 # Delta IO libraries
-ARG DELTA_VERSION=3.0.0
+ARG DELTA_VERSION=3.2.0
 RUN wget --quiet -P "${SPARK_DIST_DIR}/jars/" "https://repo1.maven.org/maven2/io/delta/delta-spark_${SCALA_VERSION}/${DELTA_VERSION}/delta-spark_${SCALA_VERSION}-${DELTA_VERSION}.jar"
 RUN wget --quiet -P "${SPARK_DIST_DIR}/jars/" "https://repo1.maven.org/maven2/org/antlr/antlr4-runtime/4.9.3/antlr4-runtime-4.9.3.jar"
 RUN wget --quiet -P "${SPARK_DIST_DIR}/jars/" "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar"

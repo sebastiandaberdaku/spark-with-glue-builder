@@ -1,7 +1,7 @@
 diff -uraBN spark-3.5.0/pom.xml spark-3.5.0_fixed/pom.xml
 --- spark-3.5.0/pom.xml	2023-09-09 03:25:06.000000000 +0200
 +++ spark-3.5.0_fixed/pom.xml	2023-09-21 18:40:32.196797000 +0200
-@@ -3293,6 +3293,9 @@
+@@ -3305,6 +3305,9 @@
              <relocation>
                <pattern>com.google.common</pattern>
                <shadedPattern>${spark.shade.packageName}.guava</shadedPattern>
