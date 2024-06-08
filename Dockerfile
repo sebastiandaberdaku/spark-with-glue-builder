@@ -1,6 +1,6 @@
 # I want to build Spark with PySpark support for Python 3.10, so I need a docker image with both Python and Java.
 # It is faster to start from an image with Python and install the JDK later. 
-FROM python:3.10.12-bookworm
+FROM python:3.10.14-bookworm
 
 # Install packages
 RUN echo "deb http://ftp.de.debian.org/debian sid main" >> /etc/apt/sources.list; \
@@ -10,7 +10,7 @@ RUN echo "deb http://ftp.de.debian.org/debian sid main" >> /etc/apt/sources.list
 
 # Install maven
 ARG MAVEN_VERSION=3.8.8
-RUN wget --quiet "https://apache.org/dyn/closer.lua/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz?action=download" -O /opt/maven.tar.gz; \
+RUN wget --quiet -O /opt/maven.tar.gz "https://apache.org/dyn/closer.lua/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz?action=download"; \
     mkdir -p /opt/maven; \
     tar zxf /opt/maven.tar.gz --strip-components=1 --directory=/opt/maven; \
     rm /opt/maven.tar.gz
@@ -21,7 +21,8 @@ ENV PATH=$PATH:${MAVEN_HOME}/bin
 
 WORKDIR /opt
 # Download and extract the Glue Data Catalog Client
-RUN wget --quiet "https://github.com/sebastiandaberdaku/aws-glue-data-catalog-client-for-apache-hive-metastore/archive/refs/tags/v3.5.1.tar.gz" -O /opt/glue.tar.gz; \
+ARG SPARK_VERSION=3.5.1
+RUN wget --quiet -O /opt/glue.tar.gz "https://github.com/sebastiandaberdaku/aws-glue-data-catalog-client-for-apache-hive-metastore/archive/refs/tags/v${SPARK_VERSION}.tar.gz"; \
     mkdir -p /opt/glue; \
     tar zxf /opt/glue.tar.gz --strip-components=1 --directory=/opt/glue; \
     rm /opt/glue.tar.gz
@@ -29,7 +30,7 @@ RUN wget --quiet "https://github.com/sebastiandaberdaku/aws-glue-data-catalog-cl
 ## Patching Apache Hive and Installing It Locally
 # Download and extract Apache Hive2 sources
 ARG HIVE2_VERSION=2.3.9
-RUN wget --quiet "https://github.com/apache/hive/archive/rel/release-${HIVE2_VERSION}.tar.gz" -O /opt/hive2.tar.gz; \
+RUN wget --quiet -O /opt/hive2.tar.gz "https://github.com/apache/hive/archive/rel/release-${HIVE2_VERSION}.tar.gz"; \
     mkdir -p /opt/hive2; \
     tar zxf /opt/hive2.tar.gz --strip-components=1 --directory=/opt/hive2; \
     rm /opt/hive2.tar.gz
@@ -43,7 +44,7 @@ RUN cd /opt/hive2; \
 
 # Download and extract Apache Hive3 sources
 ARG HIVE3_VERSION=3.1.3
-RUN wget --quiet "https://github.com/apache/hive/archive/rel/release-${HIVE3_VERSION}.tar.gz" -O /opt/hive3.tar.gz; \
+RUN wget --quiet -O /opt/hive3.tar.gz "https://github.com/apache/hive/archive/rel/release-${HIVE3_VERSION}.tar.gz"; \
     mkdir -p /opt/hive3; \
     tar zxf /opt/hive3.tar.gz --strip-components=1 --directory=/opt/hive3; \
     rm /opt/hive3.tar.gz
@@ -71,11 +72,10 @@ RUN cd /opt/glue; \
 
 ## Build Spark
 # Fetch the Spark sources
-ARG SPARK_VERSION=3.5.1
-RUN wget --quiet "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}.tgz" -O /opt/spark.tgz \
-&&  mkdir -p /opt/spark \
-&&  tar zxf /opt/spark.tgz --strip-components=1 --directory=/opt/spark \
-&&  rm /opt/spark.tgz
+RUN wget --quiet -O /opt/spark.tar.gz "https://github.com/apache/spark/archive/refs/tags/v${SPARK_VERSION}.tar.gz"; \
+    mkdir -p /opt/spark; \
+    tar zxf /opt/spark.tar.gz --strip-components=1 --directory=/opt/spark; \
+    rm /opt/spark.tar.gz
 
 # Setting up Maven's Memory Usage
 ENV MAKEFLAGS="-j$(nproc)"
