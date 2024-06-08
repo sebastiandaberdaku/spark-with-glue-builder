@@ -20,7 +20,7 @@ Finally, this image builds Spark with `Spark-Connect` support. This repository i
 ## Versions
 The following package/language versions are currently used:
 * Java 8
-* Python 3.10.14
+* Python 3.10.12
 * Scala 2.12
 * Maven 3.8.8
 * Spark 3.5.1

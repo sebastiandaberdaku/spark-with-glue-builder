@@ -1,6 +1,6 @@
 # I want to build Spark with PySpark support for Python 3.10, so I need a docker image with both Python and Java.
 # It is faster to start from an image with Python and install the JDK later. 
-FROM python:3.10.14-bookworm
+FROM python:3.10.12-bookworm
 
 # Install packages
 RUN echo "deb http://ftp.de.debian.org/debian sid main" >> /etc/apt/sources.list; \
@@ -81,10 +81,10 @@ RUN wget --quiet "https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${
 ENV MAKEFLAGS="-j$(nproc)"
 ENV MAVEN_OPTS="-Xss64m -Xmx2g -XX:ReservedCodeCacheSize=1g"
 # Patch (see: https://issues.apache.org/jira/browse/SPARK-45201) and build a runnable Spark distribution
-COPY ./spark-${SPARK_VERSION}.patch /opt/spark/
+COPY "./spark-${SPARK_VERSION}.patch" /opt/spark/
 ARG SCALA_VERSION=2.12
 RUN cd /opt/spark; \
-    patch -p1 <spark-${SPARK_VERSION}.patch; \
+    patch -p1 <"spark-${SPARK_VERSION}.patch"; \
     ./dev/make-distribution.sh \
       --name spark \
       --pip \
@@ -132,7 +132,7 @@ RUN wget --quiet -P "${SPARK_DIST_DIR}/jars/" "https://repo1.maven.org/maven2/io
 
 # Download and install Hadoop native libraries
 ARG HADOOP_HOME=/opt/hadoop
-RUN wget "http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" -O /opt/hadoop.tar.gz; \
+RUN wget "https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" -O /opt/hadoop.tar.gz; \
     mkdir -p ${HADOOP_HOME}; \
     tar zxf /opt/hadoop.tar.gz --strip-components=1 --directory="${HADOOP_HOME}"; \
     rm /opt/hadoop.tar.gz
